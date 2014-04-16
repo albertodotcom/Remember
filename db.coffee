@@ -1,5 +1,4 @@
 cb = require('couchbase')
-_ = require('underscore')
 
 config =
   host : [ "localhost:8091" ]
@@ -7,10 +6,28 @@ config =
 
 db = new cb.Connection( config )
 
-exports.all = (view, fields, func) ->
-  db.view( "#{view}s", "by_#{fields}").query (err, results) ->
-    users = _.map(results, (v, k) ->
-      id: v.id
-      email: v.key
+exports.all = (view, fields, modelClb) ->
+  db.view( "#{view}s", "#{fields}s").query (err, results) ->
+    throw err if err
+
+    modelClb(results)
+
+exports.find = (key, modelClb) ->
+  db.get(key, (err, result) ->
+    throw err if err
+
+    doc = result.value
+    modelClb(doc)
+  )
+
+exports.create = (id, doc, modelClb) ->
+  db.add(id, doc, (err, result) ->
+    throw err if err
+
+    db.get(id, (err, result) ->
+      throw err if err
+
+      doc = result.value
+      modelClb(doc)
     )
-    func(users)
+  )

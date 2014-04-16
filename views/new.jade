@@ -1,0 +1,10 @@
+extends layout
+
+
+block content
+    form(action = '/matches', method = 'post')
+        label First
+        input(type='text', name = 'first')
+        label Second
+        input(type='text', name = 'second')
+        input(type='submit')

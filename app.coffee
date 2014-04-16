@@ -6,6 +6,7 @@ cookieParser = require("cookie-parser")
 bodyParser = require("body-parser")
 routes = require("./routes/index")
 users = require("./routes/users")
+matches = require("./routes/matches")
 app = express()
 
 # view engine setup
@@ -19,6 +20,7 @@ app.use cookieParser()
 app.use express.static(path.join(__dirname, "public"))
 app.use "/", routes
 app.use "/users", users
+app.use "/matches", matches
 
 #/ catch 404 and forwarding to error handler
 app.use (req, res, next) ->
