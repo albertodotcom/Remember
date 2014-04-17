@@ -4,7 +4,6 @@ favicon = require("static-favicon")
 logger = require("morgan")
 cookieParser = require("cookie-parser")
 bodyParser = require("body-parser")
-routes = require("./routes/index")
 users = require("./routes/users")
 matches = require("./routes/matches")
 app = express()
@@ -12,13 +11,22 @@ app = express()
 # view engine setup
 app.set "views", path.join(__dirname, "views")
 app.set "view engine", "jade"
+
 app.use favicon()
 app.use logger("dev")
 app.use bodyParser.json()
 app.use bodyParser.urlencoded()
 app.use cookieParser()
 app.use express.static(path.join(__dirname, "public"))
-app.use "/", routes
+
+# if the request is not for json
+# let the front-end framework handle the routes
+app.use (req, res, next) ->
+  if req.headers.accept.indexOf('application/json') == -1
+    res.sendfile(__dirname + '/public/index.html')
+  else
+    next()
+
 app.use "/users", users
 app.use "/matches", matches
 

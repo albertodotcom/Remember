@@ -1,4 +1,5 @@
 cb = require('couchbase')
+_ = require('underscore')
 
 config =
   host : [ "localhost:8091" ]
@@ -6,11 +7,19 @@ config =
 
 db = new cb.Connection( config )
 
-exports.all = (view, fields, modelClb) ->
-  db.view( "#{view}s", "#{fields}s").query (err, results) ->
+exports.all = (view, modelClb) ->
+  db.view( "#{view}s", "#{view}s").query (err, results) ->
     throw err if err
 
-    modelClb(results)
+    indexes = _.map(results, (obj) ->
+      obj.id
+    )
+
+    db.getMulti(indexes, {}, (err, results2) ->
+      throw err if err
+
+      modelClb(results2)
+    )
 
 exports.find = (key, modelClb) ->
   db.get(key, (err, result) ->

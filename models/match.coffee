@@ -4,16 +4,23 @@ ActiveRecord = require('./active_record.coffee')
 
 class Match extends ActiveRecord
 
+  constructor: (attributes) ->
+    super(attributes)
+
+  @attributes_structure: () ->
+    id: 'number'
+    first: 'string'
+    second: 'string'
+
   @all: (ctrlClb) ->
-    db.all('match', 'match', (results) ->
+    db.all('match', (results) ->
       # format data
-#      matches = _.map(results, (v, k) ->
-#        id: v.id
-#        email: v.key
-#      )
+      matches = _.map(results, (value) ->
+        new Match(value.value)
+      )
 
       # inject data into the controller
-      ctrlClb(results)
+      ctrlClb(matches)
     )
 
   @create: (doc, func) ->
