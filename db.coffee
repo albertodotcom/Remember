@@ -18,6 +18,11 @@ exports.all = (view, modelClb) ->
     db.getMulti(indexes, {}, (err, results2) ->
       throw err if err
 
+      #TODO reduce looping. i'm looping through the element also in the model to create the object
+      results2 = _.map(results2, (item) ->
+        item.value
+      )
+
       modelClb(results2)
     )
 

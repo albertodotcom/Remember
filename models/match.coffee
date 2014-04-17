@@ -16,7 +16,7 @@ class Match extends ActiveRecord
     db.all('match', (results) ->
       # format data
       matches = _.map(results, (value) ->
-        new Match(value.value)
+        new Match(value)
       )
 
       # inject data into the controller

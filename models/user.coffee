@@ -16,7 +16,7 @@ class User extends ActiveRecord
     db.all('user', (results) ->
       # format data
       users = _.map(results, (value) ->
-        new User(value.value)
+        new User(value)
       )
 
       # inject data into the controller
