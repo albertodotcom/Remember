@@ -34,14 +34,31 @@ exports.find = (key, modelClb) ->
     modelClb(doc)
   )
 
-exports.create = (id, doc, modelClb) ->
-  db.add(id, doc, (err, result) ->
-    throw err if err
+###
+  * Function to create a new object in the database
+  * @param {doctype} model name as string
+  * @param {doc} model
+  * @param {modelClb} model callback
+###
+exports.create = (doctype, doc, modelClb) ->
+  doctype = doctype.toLowerCase()
 
-    db.get(id, (err, result) ->
+  db.incr("#{doctype}::count", (err, result) ->
+    new_id = "#{doctype}::#{result.value}"
+
+    # add id and doctype to the document
+    doc.id = new_id
+    doc.doctype = doctype
+
+    # add operation returns an error it the id already exists
+    db.add(new_id, doc, (err, result) ->
       throw err if err
 
-      doc = result.value
-      modelClb(doc)
+      db.get(new_id, (err, result) ->
+        throw err if err
+
+        doc = result.value
+        modelClb(doc)
+      )
     )
   )

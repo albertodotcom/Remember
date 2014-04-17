@@ -24,7 +24,7 @@ class Match extends ActiveRecord
     )
 
   @create: (doc, func) ->
-    id = doc.first[0..3].replace(' ', '_')
-    db.create( id, doc, func )
+    match = new User(doc)
+    db.create('match', match, func )
 
 module.exports = Match

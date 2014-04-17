@@ -8,6 +8,7 @@ class User extends ActiveRecord
     super(attributes)
 
   @attributes_structure: () ->
+    id: 'string'
     email: 'string'
     password: 'string'
     password_confirmation: 'string'
@@ -22,5 +23,9 @@ class User extends ActiveRecord
       # inject data into the controller
       ctrlClb(users)
     )
+
+  @create: (doc, ctrlClb) ->
+    user = new User(doc)
+    db.create('user', user, ctrlClb )
 
 module.exports = User

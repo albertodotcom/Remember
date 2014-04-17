@@ -22,7 +22,7 @@ app.use express.static(path.join(__dirname, "public"))
 # if the request is not for json
 # let the front-end framework handle the routes
 app.use (req, res, next) ->
-  if req.headers.accept.indexOf('application/json') == -1
+  if !req.headers['content-type'] || req.headers['content-type'].indexOf('application/json') == -1
     res.sendfile(__dirname + '/public/index.html')
   else
     next()
