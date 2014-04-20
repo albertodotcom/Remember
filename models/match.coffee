@@ -4,13 +4,15 @@ ActiveRecord = require('./active_record.coffee')
 
 class Match extends ActiveRecord
 
-  constructor: (attributes) ->
-    super(attributes)
+  constructor: (attributes, validate = true) ->
+    super(attributes, validate)
 
-  @attributes_structure: () ->
-    id: 'number'
-    first: 'string'
-    second: 'string'
+  @attributes_structure:
+    fields: ['id', 'first', 'second']
+    validates:
+      id: 'string'
+      first: 'string'
+      second: 'string'
 
   @all: (ctrlClb) ->
     db.all('match', (results) ->

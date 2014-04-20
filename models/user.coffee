@@ -4,14 +4,34 @@ ActiveRecord = require('./active_record.coffee')
 
 class User extends ActiveRecord
 
-  constructor: (attributes) ->
-    super(attributes)
+  constructor: (attributes, validate = true) ->
+    super(attributes, validate)
 
-  @attributes_structure: () ->
-    id: 'string'
-    email: 'string'
-    password: 'string'
-    password_confirmation: 'string'
+  @attributes_structure:
+    fields: ['id', 'email', 'password', 'password_confirmation']
+#    actions:
+#      save: 'all',
+#      read:
+#        except: ['password', 'password_confirmation']
+
+    validates:
+      id:
+        type: 'string'
+        error: 'It must be string'
+
+      email:
+        regex:
+          value: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
+          error: "Your email address isn't correct"
+
+      password:
+        type: 'string'
+        length:
+          min: 8
+          error: "Password must be at least 8 characters"
+
+      password_confirmation:
+        equalTo: 'password'
 
   @all: (ctrlClb) ->
     db.all('user', (results) ->
