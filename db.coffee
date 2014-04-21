@@ -1,5 +1,6 @@
 cb = require('couchbase')
 _ = require('underscore')
+Q = require('q')
 
 config =
   host : [ "localhost:8091" ]
@@ -8,8 +9,9 @@ config =
 db = new cb.Connection( config )
 
 exports.all = (view, modelClb) ->
+  deferred = Q.defer()
   db.view( "#{view}s", "#{view}s").query (err, results) ->
-    throw err if err
+    deferred.reject(err) if err
 
     indexes = _.map(results, (obj) ->
       obj.id
@@ -23,8 +25,10 @@ exports.all = (view, modelClb) ->
         item.value
       )
 
-      modelClb(results2)
+      deferred.resolve(results2)
     )
+
+  deferred.promise.nodeify(modelClb)
 
 exports.find = (key, modelClb) ->
   db.get(key, (err, result) ->

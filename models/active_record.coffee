@@ -12,6 +12,7 @@ class ActiveRecord
         @[key] = value
 
         # validations
+        return unless validate
         fieldValidation = @_validate(key)
 
         if not fieldValidation.isValid
