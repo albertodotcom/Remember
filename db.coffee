@@ -8,46 +8,58 @@ config =
 
 db = new cb.Connection( config )
 
-exports.all = (view, modelClb) ->
+exports.all = (view) ->
   deferred = Q.defer()
-  db.view( "#{view}s", "#{view}s").query (err, results) ->
-    deferred.reject(err) if err
 
-    indexes = _.map(results, (obj) ->
+  db.view( "#{view}", "#{view}_all").query (err, ids) ->
+    deferred.reject new Error(err) if err
+
+    indexes = _.map ids, (obj) ->
       obj.id
-    )
 
-    db.getMulti(indexes, {}, (err, results2) ->
-      throw err if err
+    db.getMulti indexes, {}, (err, documents) ->
+      deferred.reject new Error(err) if err
 
       #TODO reduce looping. i'm looping through the element also in the model to create the object
-      results2 = _.map(results2, (item) ->
+      documents = _.map(documents, (item) ->
         item.value
       )
 
-      deferred.resolve(results2)
-    )
+      deferred.resolve(documents)
 
-  deferred.promise.nodeify(modelClb)
+  deferred.promise
 
-exports.find = (key, modelClb) ->
-  db.get(key, (err, result) ->
-    throw err if err
-
-    doc = result.value
-    modelClb(doc)
-  )
-
+###*
+ * find an element in the database
+ * @param  {string}   key   the key of the object in the database
+ * @return {promise}  element
 ###
-  * Function to create a new object in the database
-  * @param {doctype} model name as string
-  * @param {doc} model
-  * @param {modelClb} model callback
+exports.find = (key, doctype) ->
+  deferred = Q.defer()
+
+  db.get "#{doctype}::#{key}", (err, result) ->
+    # TODO handle not found
+    deferred.reject new Error(err) if err
+
+    deferred.resolve result.value
+
+  deferred.promise
+
+###*
+ * create a new instance in the database
+ * @param  {string}   doctype     table name
+ * @param  {object}   doc         object defined in the model
+ * @param  {function} modelClb    callback of the model
+ * @return {promise}  created object
 ###
-exports.create = (doctype, doc, modelClb) ->
+exports.create = (doctype, doc) ->
+  deferred = Q.defer()
+
   doctype = doctype.toLowerCase()
 
-  db.incr("#{doctype}::count", (err, result) ->
+  db.incr "#{doctype}::count", (err, result) ->
+    deferred.reject new Error(err) if err
+
     new_id = "#{doctype}::#{result.value}"
 
     # add id and doctype to the document
@@ -55,14 +67,12 @@ exports.create = (doctype, doc, modelClb) ->
     doc.doctype = doctype
 
     # add operation returns an error it the id already exists
-    db.add(new_id, doc, (err, result) ->
-      throw err if err
+    db.add new_id, doc, (err, result) ->
+      deferred.reject new Error(err) if err
 
-      db.get(new_id, (err, result) ->
-        throw err if err
+      db.get new_id, (err, result) ->
+        deferred.reject new Error(err) if err
 
-        doc = result.value
-        modelClb(doc)
-      )
-    )
-  )
+        deferred.resolve(result.value)
+
+  deferred.promise

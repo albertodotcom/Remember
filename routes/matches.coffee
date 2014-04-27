@@ -18,10 +18,10 @@ router.post '/', (req, res) ->
 
 router.get '/:match', (req, res) ->
   match = req.param('match')
-  res.status(404) unless match
+  return res.status(404) unless match
 
   Match.find( match, (doc) ->
-    res.status(404).json({status: 'not found'}) unless doc
+    return res.status(404).json({status: 'not found'}) unless doc
 
     res.json(doc)
   )

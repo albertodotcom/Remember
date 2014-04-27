@@ -2,28 +2,61 @@ express = require("express")
 router = express.Router()
 User = require('../models/user')
 
-# GET users listing. 
+###*
+ * Get all the users
+###
 router.get "/", (req, res) ->
-  User.all (users) ->
-    res.json(users)
 
-router.get "/:email", (req, res) ->
-  res.status(404).json() unless req.param('email')
+  users = User.all()
+  
+  users
+    .then (users) ->
+      res.json(users)
 
-  User.find req.param('email'), (user) ->
-    res.status(404).json({status: 'not found'}) unless user
+    .catch (err) ->
+      console.log(err)
+      res.status(500).json()
 
-    res.json(user)
+    .done()
 
+###*
+ * Get a user
+###
+router.get "/:id", (req, res) ->
+  return res.status(404).json() unless req.param('id')
+
+  userPromise = User.find req.param('id')
+  userPromise
+    .then (user) ->
+      res.json(user)
+
+    .catch (err) ->
+      console.log(user)
+      res.status(404).json({status: 'not found'})
+
+    .done()
+
+    
+
+###*
+ * Create a new user
+ * @return {object} created user
+###
 router.post "/", (req, res) ->
   userParams = req.param('user')
-  res.status(404).json() unless userParams
+  return res.status(404).json() unless userParams
+  
+  user = User.create(userParams)
 
-  User.create userParams, (user) ->
-    res.status(404).json({status: 'not found'}) unless user
+  user
+    .then (user) ->
+      res.json(user)
 
-    user = new User(user)
+    .catch (err) ->
+      console.log(err)
+      res.status(500).json()
 
-    res.json(user)
+    .done()
+
 
 module.exports = router

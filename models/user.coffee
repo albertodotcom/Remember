@@ -1,7 +1,6 @@
 db = require('../db')
 _ = require('underscore')
 ActiveRecord = require('./active_record.coffee')
-Q = require('q')
 
 class User extends ActiveRecord
 
@@ -10,11 +9,7 @@ class User extends ActiveRecord
 
   @attributes_structure:
     fields: ['id', 'email', 'password', 'password_confirmation']
-#    actions:
-#      save: 'all',
-#      read:
-#        except: ['password', 'password_confirmation']
-
+   
     validates:
       id:
         type: 'string'
@@ -33,32 +28,5 @@ class User extends ActiveRecord
 
       password_confirmation:
         equalTo: 'password'
-
-  @all: (ctrlClb) ->
-#    db.all('user', (err, results) ->
-#      # format data
-#      users = _.map(results, (value) ->
-#        new User(value, false)
-#      )
-#
-#      # inject data into the controller
-#      ctrlClb(users)
-#    )
-#
-    users = db.all('user')
-    users.then(
-      (results) ->
-        # format data
-        users = _.map(results, (value) ->
-          new User(value, false)
-        )
-
-        # inject data into the controller
-        ctrlClb(users)
-    ).done()
-
-  @create: (doc, ctrlClb) ->
-    user = new User(doc)
-    db.create('user', user, ctrlClb )
 
 module.exports = User
