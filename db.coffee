@@ -12,13 +12,13 @@ exports.all = (view) ->
   deferred = Q.defer()
 
   db.view( "#{view}", "#{view}_all").query (err, ids) ->
-    deferred.reject new Error(err) if err
+    return deferred.reject new Error(err) if err
 
     indexes = _.map ids, (obj) ->
       obj.id
 
     db.getMulti indexes, {}, (err, documents) ->
-      deferred.reject new Error(err) if err
+      return deferred.reject new Error(err) if err
 
       #TODO reduce looping. i'm looping through the element also in the model to create the object
       documents = _.map(documents, (item) ->
@@ -39,7 +39,7 @@ exports.find = (key, doctype) ->
 
   db.get "#{doctype}::#{key}", (err, result) ->
     # TODO handle not found
-    deferred.reject new Error(err) if err
+    return deferred.reject new Error(err) if err
 
     deferred.resolve result.value
 
@@ -58,7 +58,7 @@ exports.create = (doctype, doc) ->
   doctype = doctype.toLowerCase()
 
   db.incr "#{doctype}::count", (err, result) ->
-    deferred.reject new Error(err) if err
+    return deferred.reject new Error(err) if err
 
     new_id = "#{doctype}::#{result.value}"
 
@@ -68,10 +68,10 @@ exports.create = (doctype, doc) ->
 
     # add operation returns an error it the id already exists
     db.add new_id, doc, (err, result) ->
-      deferred.reject new Error(err) if err
+      return deferred.reject new Error(err) if err
 
       db.get new_id, (err, result) ->
-        deferred.reject new Error(err) if err
+        return deferred.reject new Error(err) if err
 
         deferred.resolve(result.value)
 

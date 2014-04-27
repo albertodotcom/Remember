@@ -1,4 +1,5 @@
 express = require("express")
+_ = require('underscore')
 router = express.Router()
 User = require('../models/user')
 
@@ -18,12 +19,14 @@ router.get "/", (req, res) ->
       res.status(500).json()
 
     .done()
+    
 
 ###*
  * Get a user
 ###
 router.get "/:id", (req, res) ->
-  return res.status(404).json() unless req.param('id')
+  isParamsOk = req.param('id') && not _.isNaN parseInt(req.param('id'))
+  return res.status(404).json() unless isParamsOk
 
   userPromise = User.find req.param('id')
   userPromise
@@ -31,7 +34,7 @@ router.get "/:id", (req, res) ->
       res.json(user)
 
     .catch (err) ->
-      console.log(user)
+      console.log(err)
       res.status(404).json({status: 'not found'})
 
     .done()
